@@ -1,39 +1,42 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, globalShortcut } = require('electron')
+const url = require("./config")
+
+let win = null
+let contents = null
 
 function createWindow() {
-    // Cria uma janela de navegação.
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         width: 800,
         height: 600,
+        titleBarStyle: 'hidden',
+        alwaysOnTop: true,
         webPreferences: {
             nodeIntegration: true
         }
     })
 
-    // and load the index.html of the app.
-    win.loadFile('index.html')
+    win.loadURL(url.youtube)
 
-    // Open the DevTools.
-    win.webContents.openDevTools()
+    contents = win.webContents
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Algumas APIs podem ser usadas somente depois que este evento ocorre.
-app.whenReady().then(createWindow)
+function toogleDevTools() {
+    contents.toogleDevTools
+}
 
-// Quit when all windows are closed.
+function createShortcuts() {
+    globalShortcut.register('CmdOrCtrl+J', toogleDevTools)
+}
+
+app.whenReady().then(createWindow).then(createShortcuts)
+
 app.on('window-all-closed', () => {
-    // No macOS é comum para aplicativos e sua barra de menu 
-    // permaneçam ativo até que o usuário explicitamente encerre com Cmd + Q
     if (process.platform !== 'darwin') {
         app.quit()
     }
 })
 
 app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow()
     }
